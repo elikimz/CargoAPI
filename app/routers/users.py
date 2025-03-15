@@ -18,27 +18,6 @@ router = APIRouter()
 def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.put("/update", response_model=UserResponse)
-def update_user_profile(
-    user_update: UserUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Allows authenticated users to update their profile details."""
-    user = db.query(User).filter(User.id == current_user.id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Update fields only if they are provided
-    user.phone_number = user_update.phone_number or user.phone_number
-    user.address = user_update.address or user.address
-    user.preferred_language = user_update.preferred_language or user.preferred_language
-    user.company_name = user_update.company_name or user.company_name
-
-    db.commit()
-    db.refresh(user)
-    return user
-
 @router.get("/", response_model=list[UserResponse])
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
     """Retrieve all users (admin only)."""
@@ -49,10 +28,9 @@ def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(re
 def update_user(
     user_id: int,
     user_update: UserUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_role("admin"))
+    db: Session = Depends(get_db)
 ):
-    """Allows admin to update user details."""
+    """Allows anyone to update any user's details."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -66,6 +44,22 @@ def update_user(
     db.commit()
     db.refresh(user)
     return user
+
+    # Retrieve the user from the database
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Update fields only if they are provided
+    user.phone_number = user_update.phone_number or user.phone_number
+    user.address = user_update.address or user.address
+    user.preferred_language = user_update.preferred_language or user.preferred_language
+    user.company_name = user_update.company_name or user.company_name
+
+    db.commit()
+    db.refresh(user)
+    return user
+
 
 @router.delete("/{user_id}", response_model=dict)
 def delete_user(
