@@ -1,19 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, cargo, tracking, notifications
 
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://cargo-frontend-dusky.vercel.app"],
+    allow_origins=[
+        "http://localhost:5173",  # Local development
+        "https://cargo-frontend-dusky.vercel.app"  # Deployed frontend
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(cargo.router, prefix="/cargo", tags=["Cargo"])
