@@ -33,7 +33,7 @@ class Cargo(Base):
     description = Column(String(255), nullable=False)
     weight = Column(Float, nullable=True)
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     current_location = Column(String(100), nullable=True)
     status = Column(Enum("pending", "in transit", "delivered", name="cargo_status"), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)

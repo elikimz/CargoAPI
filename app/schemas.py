@@ -17,6 +17,7 @@ class UserLogin(BaseModel):
 class TokenData(BaseModel):
     sub: str
     role: str
+    id:str
 
 class UserResponse(BaseModel):
     id: int
