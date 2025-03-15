@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models import Cargo, User
-from app.schemas import CargoCreate, CargoResponse
+from app.schemas import CargoCreate, CargoUpdate, CargoResponse
 from app.database import get_db
 from app.routers.auth import get_current_user
 from datetime import datetime
+import json
 
 router = APIRouter()
+
+# Define allowed status values
+VALID_CARGO_STATUSES = {"pending", "in transit", "delivered"}
 
 @router.post("", response_model=CargoResponse)
 def create_cargo(
@@ -15,6 +19,11 @@ def create_cargo(
     current_user: User = Depends(get_current_user)
 ):
     """Create a new cargo shipment. Sender is set automatically."""
+    
+    # Validate ENUM status
+    if cargo_data.status not in VALID_CARGO_STATUSES:
+        raise HTTPException(status_code=400, detail="Invalid status value")
+
     new_cargo = Cargo(
         tracking_number=cargo_data.tracking_number,
         description=cargo_data.description,
@@ -25,6 +34,7 @@ def create_cargo(
         status=cargo_data.status,
         created_at=datetime.utcnow()
     )
+    
     db.add(new_cargo)
     db.commit()
     db.refresh(new_cargo)
@@ -55,7 +65,7 @@ def get_all_cargo(db: Session = Depends(get_db), current_user: User = Depends(ge
 @router.put("/{cargo_id}", response_model=CargoResponse)
 def update_cargo(
     cargo_id: int, 
-    cargo_update: CargoCreate, 
+    cargo_update: CargoUpdate, 
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
@@ -67,14 +77,29 @@ def update_cargo(
 
     if cargo.sender_id != current_user.id:
         raise HTTPException(status_code=403, detail="Only sender can update this cargo")
+    
+    # Debugging: Print received data
+    print("Received Update Data:", json.dumps(cargo_update.dict(), indent=4))
 
-    # Update fields
-    cargo.tracking_number = cargo_update.tracking_number or cargo.tracking_number
-    cargo.description = cargo_update.description or cargo.description
-    cargo.weight = cargo_update.weight or cargo.weight
-    cargo.current_location = cargo_update.current_location or cargo.current_location
-    cargo.status = cargo_update.status or cargo.status
+    # Validate ENUM status
+    if cargo_update.status and cargo_update.status not in VALID_CARGO_STATUSES:
+        raise HTTPException(status_code=400, detail="Invalid status value")
 
+    if not any([cargo_update.tracking_number, cargo_update.description, cargo_update.weight, cargo_update.current_location, cargo_update.status]):
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    # Update fields explicitly if provided
+    if cargo_update.tracking_number is not None:
+        cargo.tracking_number = cargo_update.tracking_number
+    if cargo_update.description is not None:
+        cargo.description = cargo_update.description
+    if cargo_update.weight is not None:
+        cargo.weight = cargo_update.weight
+    if cargo_update.current_location is not None:
+        cargo.current_location = cargo_update.current_location
+    if cargo_update.status is not None:
+        cargo.status = cargo_update.status
+    
     db.commit()
     db.refresh(cargo)
     return cargo

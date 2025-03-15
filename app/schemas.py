@@ -52,6 +52,13 @@ class CargoCreate(BaseModel):
     current_location: Optional[str] = None
     status: Optional[str] = "pending"  # Default status
 
+class CargoUpdate(BaseModel):
+    tracking_number: Optional[str] = None
+    description: Optional[str] = None
+    weight: Optional[float] = None
+    current_location: Optional[str] = None
+    status: Optional[str] = None
+
 class CargoResponse(BaseModel):
     id: int
     tracking_number: str
@@ -65,6 +72,7 @@ class CargoResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class TrackingCreate(BaseModel):
     cargo_id: int
