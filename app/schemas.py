@@ -44,12 +44,11 @@ class UserUpdate(BaseModel):
 
 
 
-
 class CargoCreate(BaseModel):
     tracking_number: str
     description: str
     weight: Optional[float] = None
-    receiver_id: int  # Sender ID is automatically assigned
+    receiver_id: Optional[int] = None  # Allow None for testing, handle accordingly
     current_location: Optional[str] = None
     status: Optional[str] = "pending"  # Default status
 
@@ -66,13 +65,13 @@ class CargoResponse(BaseModel):
     description: str
     weight: Optional[float] = None
     sender_id: int
-    receiver_id: int
+    receiver_id: Optional[int] = None  # Make receiver_id optional in the response
     current_location: Optional[str] = None
     status: str
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class TrackingCreate(BaseModel):

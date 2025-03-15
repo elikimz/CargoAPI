@@ -58,8 +58,8 @@ def get_all_cargo(db: Session = Depends(get_db), current_user: User = Depends(ge
     """Retrieve all cargo related to the authenticated user (sent or received)."""
     cargo_list = db.query(Cargo).filter(
         (Cargo.sender_id == current_user.id) | (Cargo.receiver_id == current_user.id)
-    ).all()
-
+    ).all()  # Don't use LIMIT here
+    
     return cargo_list
 
 @router.put("/{cargo_id}", response_model=CargoResponse)
