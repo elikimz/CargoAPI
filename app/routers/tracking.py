@@ -7,7 +7,6 @@ from datetime import datetime
 
 router = APIRouter()
 
-
 @router.post("", response_model=TrackingResponse)
 def create_tracking(tracking_data: TrackingCreate, db: Session = Depends(get_db)):
     """Create a new tracking record for cargo movement."""
@@ -27,6 +26,13 @@ def create_tracking(tracking_data: TrackingCreate, db: Session = Depends(get_db)
     db.refresh(new_tracking)
     return new_tracking
 
+@router.get("/all", response_model=list[TrackingResponse])
+def get_all_trackings(db: Session = Depends(get_db)):
+    """Retrieve all tracking records."""
+    all_trackings = db.query(Tracking).all()
+    if not all_trackings:
+        raise HTTPException(status_code=404, detail="No tracking records found")
+    return all_trackings
 
 @router.get("/{cargo_id}", response_model=list[TrackingResponse])
 def get_tracking_by_cargo(cargo_id: int, db: Session = Depends(get_db)):
@@ -35,7 +41,6 @@ def get_tracking_by_cargo(cargo_id: int, db: Session = Depends(get_db)):
     if not tracking_history:
         raise HTTPException(status_code=404, detail="No tracking history found")
     return tracking_history
-
 
 @router.put("/{tracking_id}", response_model=TrackingResponse)
 def update_tracking(tracking_id: int, tracking_data: TrackingCreate, db: Session = Depends(get_db)):
@@ -51,7 +56,6 @@ def update_tracking(tracking_id: int, tracking_data: TrackingCreate, db: Session
     db.commit()
     db.refresh(tracking_entry)
     return tracking_entry
-
 
 @router.delete("/{tracking_id}")
 def delete_tracking(tracking_id: int, db: Session = Depends(get_db)):
