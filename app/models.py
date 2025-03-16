@@ -49,7 +49,7 @@ class Tracking(Base):
     id = Column(Integer, primary_key=True, index=True)
     cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=False)
     location = Column(String(100), nullable=False)
-    status = Column(Enum("in transit", "delivered", name="tracking_status"), default="in transit")
+    status = Column(Enum("in transit", "delivered","pending", name="tracking_status"), default="pending")
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
