@@ -41,11 +41,15 @@ def get_user_notifications(current_user: User = Depends(get_current_user), db: S
     return db.query(Notification).filter(Notification.user_id == current_user.id).all()
 
 @router.delete("/{notification_id}")
-def delete_notification(notification_id: int, db: Session = Depends(get_db), admin: User = Depends(require_role("admin"))):
-    """Allows an admin to delete a notification."""
+def delete_notification(notification_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Allows an admin or the owner of the notification to delete it."""
     notification = db.query(Notification).filter(Notification.id == notification_id).first()
     if not notification:
         raise HTTPException(status_code=404, detail="Notification not found")
+
+    # Check if the current user is the owner of the notification or an admin
+    if notification.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this notification")
 
     db.delete(notification)
     db.commit()
