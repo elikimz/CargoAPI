@@ -133,7 +133,7 @@ import json
 router = APIRouter()
 
 # Define allowed status values
-VALID_CARGO_STATUSES = {"pending", "in transit", "delivered"}
+VALID_CARGO_STATUSES = {"pending", "in transit", "delivered",}
 
 @router.post("", response_model=CargoResponse)
 def create_cargo(
@@ -171,7 +171,7 @@ def get_cargo(cargo_id: int, db: Session = Depends(get_db), current_user: User =
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo not found")
 
-    if cargo.sender_id != current_user.id and cargo.receiver_id != current_user.id:
+    if current_user.role != "admin" and cargo.sender_id != current_user.id and cargo.receiver_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to view this cargo")
 
     return cargo
@@ -179,7 +179,7 @@ def get_cargo(cargo_id: int, db: Session = Depends(get_db), current_user: User =
 @router.get("", response_model=list[CargoResponse])
 def get_all_cargo(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Retrieve all cargo related to the authenticated user (sent or received)."""
-    if current_user.role=="admin": 
+    if current_user.role == "admin":
         cargo_list = db.query(Cargo).all()
     else:
         cargo_list = db.query(Cargo).filter(
@@ -195,14 +195,14 @@ def update_cargo(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update cargo details. Only the sender can update it."""
+    """Update cargo details. Only the sender or admin can update it."""
     cargo = db.query(Cargo).filter(Cargo.id == cargo_id).first()
 
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo not found")
 
-    if cargo.sender_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only sender can update this cargo")
+    if current_user.role != "admin" and cargo.sender_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only sender or admin can update this cargo")
 
     # Debugging: Print received data
     print("Received Update Data:", json.dumps(cargo_update.dict(), indent=4))
@@ -232,14 +232,14 @@ def update_cargo(
 
 @router.delete("/{cargo_id}")
 def delete_cargo(cargo_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Delete cargo. Only the sender can delete it."""
+    """Delete cargo. Only the sender or admin can delete it."""
     cargo = db.query(Cargo).filter(Cargo.id == cargo_id).first()
 
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo not found")
 
-    if cargo.sender_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only sender can delete this cargo")
+    if current_user.role != "admin" and cargo.sender_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only sender or admin can delete this cargo")
 
     db.delete(cargo)
     db.commit()
