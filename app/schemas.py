@@ -97,6 +97,7 @@ class NotificationResponse(BaseModel):
     user_id: int
     message: str
     sent_at: datetime
+    read: bool  # Include the read field
 
     class Config:
         orm_mode = True

@@ -62,6 +62,7 @@ class Notification(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     message = Column(String(255), nullable=False)
     sent_at = Column(DateTime, default=datetime.utcnow)
+    read = Column(Boolean, default=False)  # Add the read field
 
     # Relationships
     user = relationship("User", back_populates="notifications")
