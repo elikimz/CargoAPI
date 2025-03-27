@@ -5,14 +5,11 @@ from app.routers import auth, cargo, tracking, notifications,users
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",  # Local development
-    "https://cargo-frontend-dusky.vercel.app"  # Deployed frontend
-]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,  # Allow cookies/auth headers
     allow_methods=["*"],  # Allow all request methods
     allow_headers=["*"],  # Allow all headers
