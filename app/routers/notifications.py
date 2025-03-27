@@ -53,7 +53,7 @@ def delete_notification(notification_id: int, db: Session = Depends(get_db), cur
 
     db.delete(notification)
     db.commit()
-    return {"message": "Notification deleted successfully"}
+    return {"message": "Notification deleted successsfully"}
 
 @router.put("/{notification_id}/mark-as-read", response_model=NotificationResponse)
 def mark_notification_as_read(notification_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
