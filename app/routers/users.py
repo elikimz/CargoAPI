@@ -30,7 +30,7 @@ def update_user(
     user_update: UserUpdate,
     db: Session = Depends(get_db)
 ):
-    """Allows anyone to update any user's details."""
+    """Allows anyone to update any user's detailss."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
