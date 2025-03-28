@@ -7,7 +7,7 @@ app = FastAPI()
 
 origins = [
    
-    "https://rental-eta-lake.vercel.app"  
+    "https://cargo-frontend-dusky.vercel.app"  
 ]
 
 
