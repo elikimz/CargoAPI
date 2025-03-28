@@ -5,11 +5,15 @@ from app.routers import auth, cargo, tracking, notifications,users
 
 app = FastAPI()
 
+origins = [
+   
+    "https://rental-eta-lake.vercel.app"  
+]
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,  # Allow cookies/auth headers
     allow_methods=["*"],  # Allow all request methods
     allow_headers=["*"],  # Allow all headers
